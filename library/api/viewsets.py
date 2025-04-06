@@ -14,5 +14,25 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 
 class BookViewSet(viewsets.ModelViewSet):
-    queryset = Book.objects.all()
     serializer_class = BookSerializer
+
+    def get_queryset(self):
+        title_param = self.request.query_params.get('title')
+        author_param = self.request.query_params.get('author')
+        publication_param = self.request.query_params.get('publication')
+        queryset = Book.objects.all()
+
+        if title_param:
+            queryset = queryset.filter(title__icontains=title_param)
+
+        if author_param:
+            if author_param.isnumeric():
+                queryset = queryset.filter(author=author_param)
+            else:
+                queryset = queryset.filter(
+                    author__name__icontains=author_param)
+
+        if publication_param:
+            queryset = queryset.filter(publication=publication_param)
+        
+        return queryset
